@@ -84,7 +84,7 @@ resource "aws_route_table_association" "aws_playground_public_route_table_associ
 ### AWS Playground 用のセキュリティグループ作成 (入口用)
 resource "aws_security_group" "aws_playground_ingress_security_group" {
   name        = "${var.project}-${var.environment}-ingress"
-  description = "Ingress security group (rules added later)"
+  description = "Ingress security group"
   vpc_id      = aws_vpc.aws_playground_vpc.id
 
   ### 後でルールを追加するので、ここでは空にしておく
@@ -107,4 +107,42 @@ resource "aws_security_group" "aws_playground_ingress_security_group" {
     ManagedBy   = "terraform"
     Role        = "ingress"
   }
+}
+
+### AWS Playground 用のセキュリティグループ作成 (アプリケーション用)
+resource "aws_security_group" "aws_playground_app_security_group" {
+  name        = "${var.project}-${var.environment}-app"
+  description = "Application security group"
+  vpc_id      = aws_vpc.aws_playground_vpc.id
+
+  ### 後でルールを追加するので、ここでは空にしておく
+  # ingress {}
+
+  egress {
+    description = "All outbound"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name        = "${var.project}-${var.environment}-app"
+    Project     = var.project
+    Environment = var.environment
+    ManagedBy   = "terraform"
+    Role        = "app"
+  }
+}
+
+### セキュリティグループルール
+### 入口用セキュリティグループからアプリケーション用セキュリティグループへの全TCP通信を許可
+resource "aws_security_group_rule" "app_from_ingress" {
+  type                     = "ingress"
+  security_group_id        = aws_security_group.aws_playground_app_security_group.id
+  source_security_group_id = aws_security_group.aws_playground_ingress_security_group.id
+  protocol                 = "tcp" # 一旦 TCP のみに限定
+  from_port                = 0
+  to_port                  = 65535
+  description              = "Allow inbound TCP from ingress security group"
 }
