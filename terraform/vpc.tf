@@ -39,3 +39,44 @@ resource "aws_subnet" "aws_playground_public_subnet" {
     Tier        = "public"
   }
 }
+
+### AWS Playground 用のインターネットゲートウェイ作成
+resource "aws_internet_gateway" "aws_playground_internet_gateway" {
+  vpc_id = aws_vpc.aws_playground_vpc.id
+
+  tags = {
+    Name        = "${var.project}-${var.environment}-internet-gateway"
+    Project     = var.project
+    Environment = var.environment
+    ManagedBy   = "terraform"
+  }
+}
+
+### AWS Playground 用のルートテーブル作成（パブリック）
+resource "aws_route_table" "aws_playground_public_route_table" {
+  vpc_id = aws_vpc.aws_playground_vpc.id
+
+  tags = {
+    Name        = "${var.project}-${var.environment}-public-route-table"
+    Project     = var.project
+    Environment = var.environment
+    ManagedBy   = "terraform"
+    Tier        = "public"
+  }
+}
+
+### 上のルートテーブルの動きを定義
+### 上のルートテーブルを使うと、インターネットゲートウェイを介して外部へでていく
+resource "aws_route" "aws_playground_public_route" {
+  route_table_id         = aws_route_table.aws_playground_public_route_table.id
+  destination_cidr_block = "0.0.0.0/0" # 全ての宛先
+  gateway_id             = aws_internet_gateway.aws_playground_internet_gateway.id
+}
+
+### 二つのパブリックサブネットを上のルートテーブルに関連付け
+### 両方のサブネットはインターネットゲートウェイを介して外部へでていく動きをする
+resource "aws_route_table_association" "aws_playground_public_route_table_association" {
+  count          = length(aws_subnet.aws_playground_public_subnet)
+  subnet_id      = aws_subnet.aws_playground_public_subnet[count.index].id
+  route_table_id = aws_route_table.aws_playground_public_route_table.id
+}
