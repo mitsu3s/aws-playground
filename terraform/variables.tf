@@ -24,3 +24,8 @@ variable "vpc_cidr" {
   type        = string
   description = "CIDR block for the VPC"
 }
+
+# variable "db_port" {
+#   type        = number
+#   description = "Database port number"
+# }
