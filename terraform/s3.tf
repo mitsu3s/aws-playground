@@ -4,10 +4,10 @@ resource "aws_s3_bucket" "tfstate_bucket" {
 
   # 識別のためのタグ
   tags = {
-    Project     = "aws-playground"
+    Project     = var.project
     Purpose     = "terraform-state"
     ManagedBy   = "terraform"
-    Environment = "shared"
+    Environment = var.environment
   }
 }
 
