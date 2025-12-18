@@ -29,3 +29,8 @@ variable "ip_cidr" {
   type        = string
   description = "Your public IP in CIDR notation"
 }
+
+variable "ssh_key_name" {
+  type        = string
+  description = "EC2 key pair name for SSH access"
+}
