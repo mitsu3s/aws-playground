@@ -25,7 +25,7 @@ variable "vpc_cidr" {
   description = "CIDR block for the VPC"
 }
 
-# variable "db_port" {
-#   type        = number
-#   description = "Database port number"
-# }
+variable "ip_cidr" {
+  type        = string
+  description = "Your public IP in CIDR notation"
+}
