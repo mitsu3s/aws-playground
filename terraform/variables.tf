@@ -34,3 +34,13 @@ variable "ssh_key_name" {
   type        = string
   description = "EC2 key pair name for SSH access"
 }
+
+variable "ecs_task_cpu" {
+  type        = number
+  description = "CPU units for the ECS task"
+}
+
+variable "ecs_task_memory" {
+  type        = number
+  description = "Memory in MB for the ECS task"
+}

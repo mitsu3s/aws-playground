@@ -108,3 +108,34 @@ resource "aws_security_group" "aws_playground_ec2_security_group" {
     Role        = "ec2"
   }
 }
+
+### AWS Playground 用のセキュリティグループ作成 (ECS タスク用)
+resource "aws_security_group" "aws_playground_ecs_task_security_group" {
+  name        = "${var.project}-${var.environment}-ecs-task"
+  description = "Security group for ECS tasks"
+  vpc_id      = aws_vpc.aws_playground_vpc.id
+
+  ingress {
+    description = "HTTP from my IP only"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = [var.ip_cidr]
+  }
+
+  egress {
+    description = "All outbound"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name        = "${var.project}-${var.environment}-ecs-task"
+    Project     = var.project
+    Environment = var.environment
+    ManagedBy   = "terraform"
+    Role        = "ecs-task"
+  }
+}
