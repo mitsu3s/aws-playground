@@ -19,3 +19,35 @@ resource "aws_instance" "aws_playground_ec2" {
     ManagedBy   = "terraform"
   }
 }
+
+### ECS のタスク定義を作成
+### EC2 でいうところの AMI とかインスタンスタイプみたいな、設計図のようなもの
+resource "aws_ecs_task_definition" "aws_playground_nginx_task" {
+  family                   = "${var.project}-${var.environment}-nginx"
+  network_mode             = "awsvpc"    # IP とか Security Group を持つのが ENIで、ENI - Task - Container の関係になる
+  requires_compatibilities = ["FARGATE"] # Fargate を使う
+  cpu                      = var.ecs_task_cpu
+  memory                   = var.ecs_task_memory
+
+  container_definitions = jsonencode([
+    {
+      name  = "nginx"
+      image = "nginx:latest"
+
+      portMappings = [
+        {
+          containerPort = 80
+          protocol      = "tcp"
+        }
+      ]
+
+      essential = true
+    }
+  ])
+
+  tags = {
+    Project     = var.project
+    Environment = var.environment
+    ManagedBy   = "terraform"
+  }
+}
